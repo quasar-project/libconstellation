@@ -4,14 +4,20 @@
 
 #pragma once
 
-#pragma once
-
 #include <QtCore/QDataStream>
 #include <QtExtensions/QtExtensions>
 
 namespace Quasar::Datagrams
 {
-  struct TelemetryDatagram
+  enum TelemetryMarker : u32
+  {
+    StatusRequestMarker = 0x55FF55FF,
+    StatusResponseMarker = 0xEE55EE55,
+    TelemetryRequestMarker = 0x55BB55BB,
+    TelemetryResponseMarker = 0xAA55AA55
+  };
+
+  struct TelemetryResponse
   {
     u32 marker = 0x0;
     u8 version = 0x0;
@@ -30,7 +36,7 @@ namespace Quasar::Datagrams
     u8 satellites = 0;
     u16 crc16 = 0x0;
 
-    TelemetryDatagram& operator=(TelemetryDatagram d)
+    TelemetryResponse& operator=(TelemetryResponse d)
     {
       marker = d.marker;
       version = d.version;
@@ -51,13 +57,13 @@ namespace Quasar::Datagrams
       return *this;
     }
 
-    friend QDataStream& operator<<(QDataStream& dataStream, const TelemetryDatagram& data);
-    friend QDataStream& operator>>(QDataStream& dataStream, TelemetryDatagram& data);
+    friend QDataStream& operator<<(QDataStream& dataStream, const TelemetryResponse& data);
+    friend QDataStream& operator>>(QDataStream& dataStream, TelemetryResponse& data);
   };
 
   struct TelemetryRequest
   {
-    u32 marker = 0x55bb55bb;
+    u32 marker = TelemetryMarker::TelemetryRequestMarker;
     u8 init_flag = 0x00;
     u16 port = 0;
     u32 interval_ms = 0;
@@ -66,110 +72,69 @@ namespace Quasar::Datagrams
     friend QDataStream& operator<<(QDataStream& dataStream, const TelemetryRequest& data);
     friend QDataStream& operator>>(QDataStream& dataStream, TelemetryRequest& data);
   };
+} // Quasar::Datagrams
 
-  struct StatusDatagram
+namespace Quasar::Datagrams
+{
+  inline QDataStream& operator<<(QDataStream& s, const TelemetryResponse& d)
   {
-    u32 marker;
-    u16 voltage1;
-    u16 voltage2;
-    u8 switch_data;
-    u8 sar_data;
-    u8 r1;
-    u8 r2;
-
-    friend QDataStream& operator<<(QDataStream& dataStream, const StatusDatagram& data);
-    friend QDataStream& operator>>(QDataStream& dataStream, StatusDatagram& data);
-  };
-
-  inline QDataStream& operator<<(QDataStream& dataStream, const TelemetryDatagram& data)
-  {
-    dataStream << data.marker;
-    dataStream << data.version;
-    dataStream << data.latitude;
-    dataStream << data.longitude;
-    dataStream << data.altitude;
-    dataStream << data.velocity_course;
-    dataStream << data.velocity_east;
-    dataStream << data.velocity_north;
-    dataStream << data.velocity_vertical;
-    dataStream << data.pitch;
-    dataStream << data.roll;
-    dataStream << data.yaw;
-    dataStream << data.course;
-    dataStream << data.time;
-    dataStream << data.satellites;
-    dataStream << data.crc16;
-
-    return dataStream;
+    s << d.marker;
+    s << d.version;
+    s << d.latitude;
+    s << d.longitude;
+    s << d.altitude;
+    s << d.velocity_course;
+    s << d.velocity_east;
+    s << d.velocity_north;
+    s << d.velocity_vertical;
+    s << d.pitch;
+    s << d.roll;
+    s << d.yaw;
+    s << d.course;
+    s << d.time;
+    s << d.satellites;
+    s << d.crc16;
+    return s;
   }
 
-  inline QDataStream& operator>>(QDataStream& dataStream, TelemetryDatagram& data)
+  inline QDataStream& operator>>(QDataStream& s, TelemetryResponse& d)
   {
-    dataStream >> data.marker;
-    dataStream >> data.version;
-    dataStream >> data.latitude;
-    dataStream >> data.longitude;
-    dataStream >> data.altitude;
-    dataStream >> data.velocity_course;
-    dataStream >> data.velocity_east;
-    dataStream >> data.velocity_north;
-    dataStream >> data.velocity_vertical;
-    dataStream >> data.pitch;
-    dataStream >> data.roll;
-    dataStream >> data.yaw;
-    dataStream >> data.course;
-    dataStream >> data.time;
-    dataStream >> data.satellites;
-    dataStream >> data.crc16;
-
-    return dataStream;
+    s >> d.marker;
+    s >> d.version;
+    s >> d.latitude;
+    s >> d.longitude;
+    s >> d.altitude;
+    s >> d.velocity_course;
+    s >> d.velocity_east;
+    s >> d.velocity_north;
+    s >> d.velocity_vertical;
+    s >> d.pitch;
+    s >> d.roll;
+    s >> d.yaw;
+    s >> d.course;
+    s >> d.time;
+    s >> d.satellites;
+    s >> d.crc16;
+    return s;
   }
 
-  inline QDataStream& operator<<(QDataStream& dataStream, const TelemetryRequest& data)
+  inline QDataStream& operator<<(QDataStream& s, const TelemetryRequest& d)
   {
-    dataStream << data.marker;
-    dataStream << data.init_flag;
-    dataStream << data.port;
-    dataStream << data.interval_ms;
-    dataStream << data.crc16;
-
-    return dataStream;
+    s << d.marker;
+    s << d.init_flag;
+    s << d.port;
+    s << d.interval_ms;
+    s << d.crc16;
+    return s;
   }
 
-  inline QDataStream& operator >>(QDataStream& dataStream, TelemetryRequest& data)
+  inline QDataStream& operator>>(QDataStream& s, TelemetryRequest& d)
   {
-    dataStream >> data.marker;
-    dataStream >> data.init_flag;
-    dataStream >> data.port;
-    dataStream >> data.interval_ms;
-    dataStream >> data.crc16;
-
-    return dataStream;
-  }
-
-  inline QDataStream& operator<<(QDataStream& dataStream, const StatusDatagram& data)
-  {
-    dataStream << data.marker;
-    dataStream << data.voltage1;
-    dataStream << data.voltage2;
-    dataStream << data.switch_data;
-    dataStream << data.sar_data;
-    dataStream << data.r1;
-    dataStream << data.r2;
-
-    return dataStream;
-  }
-
-  inline QDataStream& operator >>(QDataStream& dataStream, StatusDatagram& data)
-  {
-    dataStream >> data.marker;
-    dataStream >> data.voltage1;
-    dataStream >> data.voltage2;
-    dataStream >> data.switch_data;
-    dataStream >> data.sar_data;
-    dataStream >> data.r1;
-    dataStream >> data.r2;
-
-    return dataStream;
+    s >> d.marker;
+    s >> d.init_flag;
+    s >> d.port;
+    s >> d.interval_ms;
+    s >> d.crc16;
+    return s;
   }
 } // Quasar::Datagrams
