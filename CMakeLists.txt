@@ -56,6 +56,8 @@ target_sources(${PROJECT_NAME}
     include/Quasar/TelemetrySocket
     include/Quasar/Data/Status
     include/Quasar/Data/Telemetry
+
+    resources/quasar_rc.qrc
   PRIVATE
     src/c++/quasar.h
     src/c++/quasar.c++
