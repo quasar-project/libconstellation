@@ -27,6 +27,10 @@ if(NOT TARGET QtExtensions)
     message(FATAL_ERROR "[Quasar Library] No Qt Extensions library found.")
 endif()
 
+if(NOT TARGET QtExtensionsNetworking)
+    message(FATAL_ERROR "[Quasar Library] No Qt Extensions Networking library found.")
+endif()
+
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOMOC ON)
 
@@ -45,14 +49,20 @@ include_directories(src/c++ include)
 add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME}
   PUBLIC
+    include/Quasar/NetworkAPI
     include/Quasar/Telemetry
+    include/Quasar/TelemetrySocket
     include/Quasar/Data/Status
     include/Quasar/Data/Telemetry
   PRIVATE
+    src/c++/networkapi.h
+    src/c++/networkapi.c++
     src/c++/datagrams/telemetry.h
     src/c++/datagrams/status.h
     src/c++/types/telemetry.h
     src/c++/types/telemetry.c++
+    src/c++/sockets/telemetrysocket.h
+    src/c++/sockets/telemetrysocket.c++
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -62,6 +72,7 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Positioning
     QtExtensions
+    QtExtensionsNetworking
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include src/c++)

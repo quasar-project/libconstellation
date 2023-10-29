@@ -36,6 +36,8 @@ namespace Quasar::Datagrams
     u8 satellites = 0;
     u16 crc16 = 0x0;
 
+    [[nodiscard]] Qt::String toString() const noexcept;
+
     TelemetryResponse& operator=(TelemetryResponse d)
     {
       marker = d.marker;
@@ -69,6 +71,8 @@ namespace Quasar::Datagrams
     u32 interval_ms = 0;
     u16 crc16 = 0x0;
 
+    [[nodiscard]] Qt::String toString() const noexcept;
+
     friend QDataStream& operator<<(QDataStream& dataStream, const TelemetryRequest& data);
     friend QDataStream& operator>>(QDataStream& dataStream, TelemetryRequest& data);
   };
@@ -76,6 +80,27 @@ namespace Quasar::Datagrams
 
 namespace Quasar::Datagrams
 {
+  inline Qt::String TelemetryResponse::toString() const noexcept
+  {
+    return Qt::String("0x%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 0x%16")
+        .arg(marker, 0, 16)
+        .arg(version)
+        .arg(latitude, 0, 'g', 7)
+        .arg(longitude, 0, 'f', 7)
+        .arg(altitude, 0, 'f', 2)
+        .arg(velocity_course, 0, 'f', 1)
+        .arg(velocity_east, 0, 'f', 1)
+        .arg(velocity_north, 0, 'f', 1)
+        .arg(velocity_vertical, 0, 'f', 1)
+        .arg(pitch, 0, 'f', 2)
+        .arg(roll, 0, 'f', 2)
+        .arg(yaw, 0, 'f', 2)
+        .arg(course, 0, 'f', 2)
+        .arg(time)
+        .arg(satellites)
+        .arg(crc16, 0, 16);
+  }
+
   inline QDataStream& operator<<(QDataStream& s, const TelemetryResponse& d)
   {
     s << d.marker;
@@ -116,6 +141,16 @@ namespace Quasar::Datagrams
     s >> d.satellites;
     s >> d.crc16;
     return s;
+  }
+
+  inline Qt::String TelemetryRequest::toString() const noexcept
+  {
+    return Qt::String("0x%1 %2 %3 %4 0x%5")
+        .arg(marker, 0, 16)
+        .arg(init_flag)
+        .arg(port)
+        .arg(interval_ms)
+        .arg(crc16, 0, 16);
   }
 
   inline QDataStream& operator<<(QDataStream& s, const TelemetryRequest& d)
