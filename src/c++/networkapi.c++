@@ -17,7 +17,10 @@ namespace Quasar
     ))
     , m_telemetry(new Telemetry(this))
     , m_telemetry_socket(new TelemetrySocket(telemetry(), this))
-  {}
+  {
+    Qt::Object::connect(telemetry(), &Telemetry::positionChanged, this, &NetworkAPI::telemetryChanged);
+    Qt::Object::connect(telemetry(), &Telemetry::seaLevelChanged, this, &NetworkAPI::telemetryChanged);
+  }
 
   Qtx::StaticConfig* NetworkAPI::config() const { return m_config.get(); }
   Telemetry* NetworkAPI::telemetry() const { return m_telemetry; }

@@ -19,7 +19,7 @@ namespace Quasar
   class NetworkAPI : public Qt::Object
   {
     Q_OBJECT
-    Q_PROPERTY(Quasar::Telemetry* telemetry READ telemetry CONSTANT FINAL)
+    Q_PROPERTY(Quasar::Telemetry* telemetry READ telemetry NOTIFY telemetryChanged FINAL)
     Q_PROPERTY(Quasar::TelemetrySocket* telemetrySocket READ telemetrySocket CONSTANT FINAL)
 
     public:
@@ -34,6 +34,9 @@ namespace Quasar
       [[nodiscard]] Qtx::StaticConfig* config() const;
       [[nodiscard]] Telemetry* telemetry() const;
       [[nodiscard]] TelemetrySocket* telemetrySocket() const;
+
+    signals:
+      void telemetryChanged();
 
     private:
       explicit NetworkAPI(Qt::Object* parent = nullptr);
