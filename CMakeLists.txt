@@ -51,6 +51,7 @@ target_sources(${PROJECT_NAME}
   PUBLIC
     include/Quasar/Quasar
     include/Quasar/NetworkAPI
+    include/Quasar/Utils
     include/Quasar/Telemetry
     include/Quasar/TelemetrySocket
     include/Quasar/Data/Status
@@ -60,6 +61,8 @@ target_sources(${PROJECT_NAME}
     src/c++/quasar.c++
     src/c++/networkapi.h
     src/c++/networkapi.c++
+    src/c++/utils.h
+    src/c++/utils.c++
     src/c++/datagrams/telemetry.h
     src/c++/datagrams/status.h
     src/c++/types/telemetry.h

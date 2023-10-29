@@ -7,6 +7,6 @@
 namespace Quasar
 {
   [[maybe_unused]] void registerTypes(const char* uri = "Quasar",
-                                          int major = 1,
-                                          int minor = 0) noexcept;
+                                      int major = 1,
+                                      int minor = 0) noexcept;
 } // Quasar
