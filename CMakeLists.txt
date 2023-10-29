@@ -56,8 +56,8 @@ target_sources(${PROJECT_NAME}
     include/Quasar/Data/Status
     include/Quasar/Data/Telemetry
   PRIVATE
-    src/c++/register.h
-    src/c++/register.c++
+    src/c++/quasar.h
+    src/c++/quasar.c++
     src/c++/networkapi.h
     src/c++/networkapi.c++
     src/c++/datagrams/telemetry.h
