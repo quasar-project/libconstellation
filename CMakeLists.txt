@@ -49,12 +49,15 @@ include_directories(src/c++ include)
 add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME}
   PUBLIC
+    include/Quasar/Quasar
     include/Quasar/NetworkAPI
     include/Quasar/Telemetry
     include/Quasar/TelemetrySocket
     include/Quasar/Data/Status
     include/Quasar/Data/Telemetry
   PRIVATE
+    src/c++/register.h
+    src/c++/register.c++
     src/c++/networkapi.h
     src/c++/networkapi.c++
     src/c++/datagrams/telemetry.h
