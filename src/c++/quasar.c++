@@ -3,11 +3,12 @@
 //
 
 #include "quasar.h"
+
 #include <QtExtensions/QMLRegistration>
 #include <Quasar/NetworkAPI>
 
 void Quasar::registerTypes(const char* uri, int major, int minor) noexcept
 {
   qmlRegisterModule(uri, major, minor);
-  qmlRegisterSingletonType<NetworkAPI>(uri, major, minor, "QuasarNetworkAPI", NetworkAPI::create);
+  qmlRegisterSingletonType<NetworkAPI>(uri, major, minor, "Quasar", NetworkAPI::create);
 }
