@@ -45,11 +45,14 @@ include_directories(src/c++ include)
 add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME}
   PUBLIC
+    include/Quasar/Telemetry
     include/Quasar/Data/Status
     include/Quasar/Data/Telemetry
   PRIVATE
     src/c++/datagrams/telemetry.h
     src/c++/datagrams/status.h
+    src/c++/types/telemetry.h
+    src/c++/types/telemetry.c++
 )
 
 target_link_libraries(${PROJECT_NAME}
