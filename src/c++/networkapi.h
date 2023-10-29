@@ -4,11 +4,15 @@
 
 #pragma once
 
+#include <memory>
 #include <QtCore/QObject>
 #include <QtExtensions/QtExtensions>
 #include <QtExtensions/QMLRegistration>
+#include <QtExtensions/StaticConfig>
 #include <Quasar/Telemetry>
 #include <Quasar/TelemetrySocket>
+
+using std::unique_ptr;
 
 namespace Quasar
 {
@@ -27,6 +31,7 @@ namespace Quasar
       NetworkAPI& operator=(const NetworkAPI&) = delete;
       NetworkAPI& operator=(NetworkAPI&&) = delete;
 
+      [[nodiscard]] Qtx::StaticConfig* config() const;
       [[nodiscard]] Telemetry* telemetry() const;
       [[nodiscard]] TelemetrySocket* telemetrySocket() const;
 
@@ -34,6 +39,7 @@ namespace Quasar
       explicit NetworkAPI(Qt::Object* parent = nullptr);
 
     private:
+      unique_ptr<Qtx::StaticConfig> m_config;
       Telemetry* m_telemetry;
       TelemetrySocket* m_telemetry_socket;
   };
