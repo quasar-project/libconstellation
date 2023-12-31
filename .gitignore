@@ -18,3 +18,8 @@ ui_*
 src/html/
 src/latex/
 
+
+
+# Added by cargo
+
+/target
