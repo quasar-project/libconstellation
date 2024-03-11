@@ -1,86 +1,57 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(QuasarLibrary
-  VERSION 2.0.0
-  DESCRIPTION "Quasar Library"
+include_guard(GLOBAL)
+
+project(constellation
+  VERSION 0.1.0
+  DESCRIPTION "Library for working with QuaSAR remote protocols and hardware"
   HOMEPAGE_URL "io.github.whs31"
   LANGUAGES C CXX
 )
 
-if(NOT CMAKE_C_STANDARD)
-    set(CMAKE_C_STANDARD 23)
-    set(CMAKE_C_STANDARD_REQUIRED OFF)
-    set(CMAKE_C_EXTENSIONS OFF)
-endif(NOT CMAKE_C_STANDARD)
+option(DEV_BINARY "Enable building of dev binary" OFF)
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 23)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    set(CMAKE_CXX_EXTENSIONS OFF)
-endif(NOT CMAKE_CXX_STANDARD)
+include(dependencies/cmake/all.cmake)
+enable_cross_compile_options()
+set_language_standard(23)
 
-if(TARGET ${PROJECT_NAME})
-    return()
-endif()
-
-if(NOT TARGET QtExtensions)
-    message(FATAL_ERROR "[Quasar Library] No Qt Extensions library found.")
-endif()
-
-if(NOT TARGET QtExtensionsNetworking)
-    message(FATAL_ERROR "[Quasar Library] No Qt Extensions Networking library found.")
-endif()
-
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOMOC ON)
-
-find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED
-  COMPONENTS
-    Core
-    Gui
-    Network
-    Positioning
-)
-
-enable_testing()
-include_directories(src/c++ include)
+find_package(leaf REQUIRED CONFIG)
+find_package(leafconf REQUIRED CONFIG)
+find_package(Boost REQUIRED)
 
 add_library(${PROJECT_NAME} STATIC)
+add_library(${PROJECT_NAME}::leaf ALIAS ${PROJECT_NAME})
+
 target_sources(${PROJECT_NAME}
   PUBLIC
-    include/Quasar/Quasar
-    include/Quasar/NetworkAPI
-    include/Quasar/Utils
-    include/Quasar/Telemetry
-    include/Quasar/TelemetrySocket
-    include/Quasar/Data/Status
-    include/Quasar/Data/Telemetry
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/ip/localaddr.h> $<INSTALL_INTERFACE:include/constellation/ip/localaddr.h>
 
-    resources/quasar_rc.qrc
   PRIVATE
-    src/c++/quasar.h
-    src/c++/quasar.c++
-    src/c++/networkapi.h
-    src/c++/networkapi.c++
-    src/c++/utils.h
-    src/c++/utils.c++
-    src/c++/datagrams/telemetry.h
-    src/c++/datagrams/status.h
-    src/c++/types/telemetry.h
-    src/c++/types/telemetry.c++
-    src/c++/sockets/telemetrysocket.h
-    src/c++/sockets/telemetrysocket.c++
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/localaddr.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-  PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Network
-    Qt${QT_VERSION_MAJOR}::Positioning
-    QtExtensions
-    QtExtensionsNetworking
+  PUBLIC
+    leaf::leaf
+    leafconf::leafconf
+    Boost::boost
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include src/c++)
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  PRIVATE
+  src/c++
+)
+
+target_add_metadata_definitions(${PROJECT_NAME} COMPANY "whs31")
+enable_static_crt()
+
+target_install_library(${PROJECT_NAME} NAME constellation NAMESPACE quasar)
+
+if(DEV_BINARY)
+    add_subdirectory(bin)
+endif()
+
+unset(DEV_BINARY CACHE)
