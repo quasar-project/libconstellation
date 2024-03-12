@@ -65,6 +65,7 @@ namespace constellation::network::modules
       .checksum = 0x0000
     };
 
+    llog::trace("powerswitch: toggling channel {}", channel);
     this->write({reinterpret_cast<const char*>(&packet), sizeof(packet)});
   }
 
