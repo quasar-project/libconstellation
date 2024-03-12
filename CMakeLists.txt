@@ -47,8 +47,8 @@ target_link_libraries(${PROJECT_NAME}
     leaf::leaf
     leaf::leafconf
     Boost::boost
-    Qt::Core
-    Qt::Network
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
 )
 
 target_include_directories(${PROJECT_NAME}
