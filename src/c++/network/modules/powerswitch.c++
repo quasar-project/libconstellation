@@ -17,6 +17,25 @@ namespace constellation::network::modules
   constexpr u16 DUMMY_CHANNEL = 9'999;
   constexpr auto REQUEST_MARKER = 0xAAAAAAAA;
 
+  ChannelData::ChannelData()
+    : m_voltage(0.0f)
+    , m_current(0.0f)
+    , m_status(false)
+  {}
+
+  ChannelData::ChannelData(const f32 voltage, const f32 current, const bool status)
+    : m_voltage(voltage)
+    , m_current(current)
+    , m_status(status)
+  {}
+
+  float ChannelData::voltage() const { return this->m_voltage; }
+  void ChannelData::setVoltage(const float value) { this->m_voltage = value; }
+  float ChannelData::current() const { return this->m_current; }
+  void ChannelData::setCurrent(const float value) { this->m_current = value; }
+  bool ChannelData::status() const { return this->m_status; }
+  void ChannelData::setStatus(const bool value) { this->m_status = value; }
+
   PowerSwitch::PowerSwitch(
     const string_view ipv4,
     const u16 port,
@@ -34,8 +53,9 @@ namespace constellation::network::modules
   }
 
   PowerSwitch::~PowerSwitch() { this->stop(); }
+  QList<ChannelData> PowerSwitch::channels() const { return {this->m_channels.begin(), this->m_channels.end()}; }
 
-  auto PowerSwitch::toggle_channel(const int channel) const -> void
+  auto PowerSwitch::toggleChannel(const int channel) const -> void
   {
     const auto packet = RequestPacket{
       .marker = REQUEST_MARKER,
@@ -52,6 +72,15 @@ namespace constellation::network::modules
     llog::trace("closing connection to {}", this->m_socket->localAddress().toString().toStdString());
     this->m_socket->close();
     this->m_scheduler->stop();
+  }
+
+  bool PowerSwitch::start(const QString& ip, const u16 port, const f32 request_interval_seconds)
+  {
+    return this->configure(
+      ip.toStdString(),
+      port,
+      std::chrono::duration_cast<std::chrono::seconds>(std::chrono::duration<double>(request_interval_seconds))
+    ).has_value();
   }
 
   auto PowerSwitch::configure(
@@ -89,7 +118,7 @@ namespace constellation::network::modules
   auto PowerSwitch::request() const -> void
   {
     llog::trace("powerswitch: sending planned request");
-    this->toggle_channel(DUMMY_CHANNEL);
+    this->toggleChannel(DUMMY_CHANNEL);
   }
 
   auto PowerSwitch::read() -> void
@@ -102,13 +131,14 @@ namespace constellation::network::modules
       for(const auto datagram = reinterpret_cast<array<ResponsePacket, 8>*>(data.data());
           const auto& [marker, channel, enabled, voltage, current] : *datagram)
       {
-        this->m_channels[channel] = ChannelData{
-          .voltage = static_cast<f32>(voltage) / 1'000.0f,
-          .current = static_cast<f32>(current),
-          .enabled = static_cast<bool>(enabled)
-        };
+        this->m_channels[channel] = ChannelData(
+          static_cast<f32>(voltage) / 1'000.0f,
+          static_cast<f32>(current),
+          static_cast<bool>(enabled)
+        );
       }
     }
+    emit this->channelsChanged();
   }
 
   auto PowerSwitch::write(const string_view data) const -> void

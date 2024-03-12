@@ -3,7 +3,7 @@
 #include <array>
 #include <memory>
 #include <chrono>
-#include <leaf/pattern/iobservable.h>
+#include <qobject.h>
 #include <constellation/global.h>
 
 class QTimer;
@@ -15,8 +15,38 @@ namespace constellation::network::modules
   using std::unique_ptr;
   using std::array;
 
-  class PowerSwitch : public leaf::pattern::IObservable<int>
+  class ChannelData
   {
+    Q_GADGET
+    Q_PROPERTY(float voltage READ voltage WRITE setVoltage FINAL)
+    Q_PROPERTY(float current READ current WRITE setCurrent FINAL)
+    Q_PROPERTY(bool status READ status WRITE setStatus FINAL)
+
+    public:
+      ChannelData();
+      ChannelData(f32 voltage, f32 current, bool status);
+
+      [[nodiscard]] float voltage() const;
+      void setVoltage(float value);
+
+      [[nodiscard]] float current() const;
+      void setCurrent(float value);
+
+      [[nodiscard]] bool status() const;
+      void setStatus(bool value);
+
+    private:
+      f32 m_voltage;      ///< Напряжение в вольтах
+      f32 m_current;      ///< Ток в миллиамперах
+      bool m_status;      ///< Состояние канала (вкл/выкл)
+  };
+
+  // ReSharper disable once CppClassCanBeFinal
+  class PowerSwitch : public QObject
+  {
+    Q_OBJECT
+    Q_PROPERTY(QList<ChannelData> channels READ channels NOTIFY channelsChanged FINAL)
+
     struct [[gnu::packed]] RequestPacket
     {
       u32 marker;
@@ -30,24 +60,22 @@ namespace constellation::network::modules
       u16 marker;
       u8 channel;
       u8 enabled;
-      u32 voltage;        ///< Напряжение в милливольтах
-      u32 current;        ///< Ток в миллиамперах
-    };
-
-    struct ChannelData
-    {
-      f32 voltage;        ///< Напряжение в вольтах
-      f32 current;        ///< Ток в миллиамперах
-      bool enabled;       ///< Состояние канала (вкл/выкл)
+      u32 voltage; ///< Напряжение в милливольтах
+      u32 current; ///< Ток в миллиамперах
     };
 
     public:
       explicit PowerSwitch(string_view ipv4, u16 port, std::chrono::seconds request_interval);
-      ~PowerSwitch();
+      virtual ~PowerSwitch() override;
 
-      [[nodiscard]] auto channel_status(int channel) -> ChannelData;
-      auto toggle_channel(int channel) const -> void;
-      auto stop() const -> void;
+      [[nodiscard]] QList<ChannelData> channels() const;
+
+      Q_INVOKABLE void toggleChannel(int channel) const;
+      Q_INVOKABLE void stop() const;
+      Q_INVOKABLE bool start(const QString& ip, const u16 port, f32 request_interval_seconds);
+
+    signals:
+      void channelsChanged();
 
     private:
       auto configure(string_view ipv4, u16 port, std::chrono::seconds request_interval) -> expected<void, string>;
@@ -68,3 +96,6 @@ namespace constellation::network::modules
       array<ChannelData, 8> m_channels;
   };
 }
+
+Q_DECLARE_METATYPE(constellation::network::modules::ChannelData)
+Q_DECLARE_METATYPE(constellation::network::modules::PowerSwitch*)

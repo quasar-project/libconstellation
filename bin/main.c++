@@ -1,7 +1,7 @@
 #include <leaf/leaf.h>
 #include <leaf/logger.h>
 #include <constellation/ip/ipv4.h>
-#include <constellation/network/modules/powerswitch.h>
+#include <constellation/network/api.h>
 #include <qcoreapplication.h>
 
 auto main(int argc, char* argv[]) -> int
@@ -20,10 +20,11 @@ auto main(int argc, char* argv[]) -> int
 
   QCoreApplication app(argc, argv);
 
-  auto powerswitch = constellation::network::modules::PowerSwitch(
-    "192.168.1.50",
-    44000,
-    std::chrono::seconds(5)
+  const auto api = constellation::network::NetworkAPI();
+  QObject::connect(
+    api.powerSwitch(),
+    &constellation::network::modules::PowerSwitch::channelsChanged,
+    [&]{ llog::warn("{}", api.powerSwitch()->channels().first().voltage()); }
   );
 
   return QCoreApplication::exec();
