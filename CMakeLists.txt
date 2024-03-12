@@ -18,6 +18,10 @@ set_language_standard(23)
 find_package(leaf REQUIRED CONFIG)
 find_package(leafconf REQUIRED CONFIG)
 find_package(Boost REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
+
+set(CMAKE_AUTOMOC ON)
 
 add_library(${PROJECT_NAME} STATIC
   include/constellation/global.h
@@ -41,6 +45,8 @@ target_link_libraries(${PROJECT_NAME}
     leaf::leaf
     leaf::leafconf
     Boost::boost
+    Qt::Core
+    Qt::Network
 )
 
 target_include_directories(${PROJECT_NAME}

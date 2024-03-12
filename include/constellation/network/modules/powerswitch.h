@@ -4,9 +4,10 @@
 #include <memory>
 #include <chrono>
 #include <leaf/pattern/iobservable.h>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <constellation/global.h>
+
+class QTimer;
+class QUdpSocket;
 
 namespace constellation::network::modules
 {
@@ -41,25 +42,27 @@ namespace constellation::network::modules
     };
 
     public:
-      explicit PowerSwitch(string_view ipv4, u16 port, boost::asio::io_context& context, std::chrono::seconds request_interval);
+      explicit PowerSwitch(string_view ipv4, u16 port, std::chrono::seconds request_interval);
       ~PowerSwitch();
 
       [[nodiscard]] auto channel_status(int channel) -> ChannelData;
-      auto toggle_channel(int channel) -> void;
-      auto stop() -> void;
+      auto toggle_channel(int channel) const -> void;
+      auto stop() const -> void;
 
     private:
       auto configure(string_view ipv4, u16 port, std::chrono::seconds request_interval) -> expected<void, string>;
-      auto request() -> void;
+      auto request() const -> void;
       auto read() -> void;
-      auto handle_timer() -> void;
-      auto write(string_view data) -> void;
+      auto write(string_view data) const -> void;
 
     private:
-      boost::asio::ip::udp::socket m_socket;
-      boost::asio::ip::udp::endpoint m_endpoint;
-      boost::asio::ip::udp::endpoint m_target;
-      boost::asio::steady_timer m_timer;
+      struct endpoint
+      {
+        string_view ip;
+        u16 port;
+      } m_target;
+      unique_ptr<QUdpSocket> m_socket;
+      unique_ptr<QTimer> m_scheduler;
       std::chrono::seconds m_request_interval;
       array<u8, 1024> m_buffer;
       array<ChannelData, 8> m_channels;

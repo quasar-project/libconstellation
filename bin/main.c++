@@ -2,8 +2,9 @@
 #include <leaf/logger.h>
 #include <constellation/ip/ipv4.h>
 #include <constellation/network/modules/powerswitch.h>
+#include <qcoreapplication.h>
 
-auto main() -> int
+auto main(int argc, char* argv[]) -> int
 {
   const auto logger = leaf::Logger(
     "test-logger",
@@ -17,14 +18,13 @@ auto main() -> int
   llog::info("bench started!");
   auto local_address = constellation::ip::Ipv4::local_address();
 
-  auto context = boost::asio::io_context();
+  QCoreApplication app(argc, argv);
+
   auto powerswitch = constellation::network::modules::PowerSwitch(
     "192.168.1.50",
     44000,
-    context,
     std::chrono::seconds(5)
   );
 
-  context.run();
-  return 0;
+  return QCoreApplication::exec();
 }
