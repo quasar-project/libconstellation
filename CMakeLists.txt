@@ -28,10 +28,12 @@ target_sources(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/global.h> $<INSTALL_INTERFACE:include/constellation/global.h>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/ip/ipv4.h> $<INSTALL_INTERFACE:include/constellation/ip/ipv4.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/network/modules/powerswitch.h> $<INSTALL_INTERFACE:include/constellation/network/modules/powerswitch.h>
 
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/netif.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/ipv4.c++
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/network/modules/powerswitch.c++
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -27,14 +27,18 @@ namespace constellation::ip
   auto Ipv4::local_address() -> expected<Ipv4, string>
   {
     static auto local_address = local_address_impl();
-    if(not local_address.has_value()) {
-      llog::error("failed to resolve local ipv4 address, reason: {}", local_address.error());
-      constellation::unrecoverable_error();
-    }
-    else
-      llog::debug("resolved local ipv4 address: {}", local_address.value().to_string());
     return local_address;
   }
 
-  auto Ipv4::local_address_unchecked() -> Ipv4 { return *Ipv4::local_address(); }
+  auto Ipv4::local_address_unchecked() -> Ipv4
+  {
+    const auto addr = Ipv4::local_address();
+    if(not addr.has_value()) {
+      llog::error("failed to resolve local ipv4 address, reason: {}", addr.error());
+      constellation::unrecoverable_error();
+    }
+    else
+      llog::debug("resolved local ipv4 address: {}", addr.value().to_string());
+    return *addr;
+  }
 }
