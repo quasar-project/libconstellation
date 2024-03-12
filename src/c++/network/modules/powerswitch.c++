@@ -18,18 +18,18 @@ namespace constellation::network::modules
   PowerSwitch::PowerSwitch(
     const string_view ipv4,
     const u16 port,
-    boost::asio::io_context& context,
+    asio::io_context& context,
     const std::chrono::seconds request_interval
   )
     : m_socket(context, asio::ip::udp::endpoint()),
       m_endpoint(this->m_socket.local_endpoint()),
-      m_buffer(array<u8, 1024>()),
-      m_channels(array<ChannelData, 8>()),
+      m_timer(context),
       m_request_interval(request_interval),
-      m_timer(context, boost::posix_time::seconds(request_interval.count()))
+      m_buffer(array<u8, 1024>()),
+      m_channels(array<ChannelData, 8>())
   {
     this->configure(ipv4, port, request_interval)
-      .map_error([](const auto& e){ llog::error("failed tox initialize powerswitch: {}", e); });
+      .map_error([](const auto& e){ llog::error("failed to initialize powerswitch: {}", e); });
   }
 
   PowerSwitch::~PowerSwitch() { this->stop(); }
@@ -76,9 +76,9 @@ namespace constellation::network::modules
         port
       );
 
-      this->m_timer = boost::asio::deadline_timer(
+      this->m_timer = asio::steady_timer(
         this->m_socket.get_executor(),
-        boost::posix_time::seconds(request_interval.count())
+        this->m_request_interval
       );
       this->handle_timer();
 
@@ -107,39 +107,37 @@ namespace constellation::network::modules
       this->m_endpoint,
       [this](const auto& ec, const auto& bytes_transferred)
       {
-        if(ec)
+        if(ec) {
+          llog::error("powerswitch: error: {}", ec.message());
           return;
-        this->handle_incoming(bytes_transferred);
+        }
+        const auto raw = span(this->m_buffer).first(bytes_transferred);
+        for(const auto datagram = reinterpret_cast<array<ResponsePacket, 8>*>(raw.data());
+          const auto& [marker, channel, enabled, voltage, current] : *datagram) {
+          this->m_channels[channel] = ChannelData {
+            .voltage = static_cast<f32>(voltage) / 1'000.0f,
+            .current = static_cast<f32>(current),
+            .enabled = static_cast<bool>(enabled)
+          };
+        }
+        llog::trace("[:{} {}V {} mA]", this->m_channels.front().enabled, this->m_channels.front().voltage, this->m_channels.front().current);
+
         this->read();
       }
     );
   }
 
-  auto PowerSwitch::handle_incoming(const usize bytes) -> void
-  {
-    const auto raw = span(this->m_buffer).first(bytes);
-    for(const auto datagram = reinterpret_cast<array<ResponsePacket, 8>*>(raw.data());
-      const auto& [marker, channel, enabled, voltage, current] : *datagram) {
-      this->m_channels[channel] = ChannelData {
-        .voltage = static_cast<f32>(voltage) / 1'000.0f,
-        .current = static_cast<f32>(current),
-        .enabled = static_cast<bool>(enabled)
-      };
-    }
-
-    // for(const auto& [voltage, current, enabled]: this->m_channels)
-    //   llog::trace("[:{} {}V {} mA]", enabled, voltage, current);
-  }
-
   auto PowerSwitch::handle_timer() -> void
   {
     this->request();
-    this->m_timer.expires_from_now(boost::posix_time::seconds(this->m_request_interval.count()));
+    this->m_timer.expires_from_now(this->m_request_interval);
     this->m_timer.async_wait(
       [this](const auto& ec)
       {
-        if(ec)
+        if(ec) {
+          llog::error("powerswitch: error: {}", ec.message());
           return;
+        }
         this->handle_timer();
       }
     );
@@ -152,13 +150,17 @@ namespace constellation::network::modules
       this->m_target,
       [this](const auto& ec, const auto& bytes_transferred)
       {
-        if(ec)
+        if(ec) {
+          llog::error("powerswitch: error: {}", ec.message());
           return;
+        }
         llog::trace("powerswitch: sent {} bytes to {}:{}",
           bytes_transferred,
           this->m_target.address().to_string(),
           this->m_target.port()
         );
+
+        this->read();
       }
     );
   }

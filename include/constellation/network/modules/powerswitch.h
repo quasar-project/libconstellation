@@ -5,11 +5,12 @@
 #include <chrono>
 #include <leaf/pattern/iobservable.h>
 #include <boost/asio/ip/udp.hpp>
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <constellation/global.h>
 
 namespace constellation::network::modules
 {
+  using std::thread;
   using std::unique_ptr;
   using std::array;
 
@@ -45,14 +46,12 @@ namespace constellation::network::modules
 
       [[nodiscard]] auto channel_status(int channel) -> ChannelData;
       auto toggle_channel(int channel) -> void;
-
       auto stop() -> void;
 
     private:
       auto configure(string_view ipv4, u16 port, std::chrono::seconds request_interval) -> expected<void, string>;
       auto request() -> void;
       auto read() -> void;
-      auto handle_incoming(usize bytes) -> void;
       auto handle_timer() -> void;
       auto write(string_view data) -> void;
 
@@ -60,7 +59,7 @@ namespace constellation::network::modules
       boost::asio::ip::udp::socket m_socket;
       boost::asio::ip::udp::endpoint m_endpoint;
       boost::asio::ip::udp::endpoint m_target;
-      boost::asio::deadline_timer m_timer;
+      boost::asio::steady_timer m_timer;
       std::chrono::seconds m_request_interval;
       array<u8, 1024> m_buffer;
       array<ChannelData, 8> m_channels;
