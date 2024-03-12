@@ -18,15 +18,13 @@ set_language_standard(23)
 find_package(leaf REQUIRED CONFIG)
 find_package(leafconf REQUIRED CONFIG)
 find_package(Boost REQUIRED)
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
+find_package(QT NAMES Qt6 COMPONENTS Core Network REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Quick Network)
 
 set(CMAKE_AUTOMOC ON)
 
-add_library(${PROJECT_NAME} STATIC
-  include/constellation/global.h
-  src/c++/ip/netif.h)
-add_library(${PROJECT_NAME}::leaf ALIAS ${PROJECT_NAME})
+add_library(${PROJECT_NAME} STATIC)
+add_library(quasar::constellation ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
   PUBLIC
@@ -53,10 +51,10 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
   PRIVATE
-  src/c++
+    src/c++
 )
 
 target_add_metadata_definitions(${PROJECT_NAME} COMPANY "whs31")

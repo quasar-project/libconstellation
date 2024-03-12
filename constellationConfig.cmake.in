@@ -7,7 +7,6 @@ include(CMakeFindDependencyMacro)
 find_dependency(leaf CONFIG)
 find_dependency(leafconf CONFIG)
 find_dependency(magic_enum)
-find_dependency(Qt6)
 find_dependency(Boost)
 
 include("${CMAKE_CURRENT_LIST_DIR}/${config_targets_file_constellation}")
