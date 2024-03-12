@@ -29,12 +29,12 @@ namespace constellation::network::modules
     , m_status(status)
   {}
 
-  float ChannelData::voltage() const { return this->m_voltage; }
-  void ChannelData::setVoltage(const float value) { this->m_voltage = value; }
-  float ChannelData::current() const { return this->m_current; }
-  void ChannelData::setCurrent(const float value) { this->m_current = value; }
-  bool ChannelData::status() const { return this->m_status; }
-  void ChannelData::setStatus(const bool value) { this->m_status = value; }
+  auto ChannelData::voltage() const -> float { return this->m_voltage; }
+  auto ChannelData::setVoltage(const float value) -> void { this->m_voltage = value; }
+  auto ChannelData::current() const -> float { return this->m_current; }
+  auto ChannelData::setCurrent(const float value) -> void { this->m_current = value; }
+  auto ChannelData::status() const -> bool { return this->m_status; }
+  auto ChannelData::setStatus(const bool value) -> void { this->m_status = value; }
 
   PowerSwitch::PowerSwitch(
     const string_view ipv4,
@@ -50,10 +50,11 @@ namespace constellation::network::modules
   {
     this->configure(ipv4, port, request_interval)
         .map_error([](const auto& e) { llog::error("failed to initialize powerswitch: {}", e); });
+    this->stop();
   }
 
   PowerSwitch::~PowerSwitch() { this->stop(); }
-  QList<ChannelData> PowerSwitch::channels() const { return {this->m_channels.begin(), this->m_channels.end()}; }
+  auto PowerSwitch::channels() const -> QList<ChannelData> { return {this->m_channels.begin(), this->m_channels.end()}; }
 
   auto PowerSwitch::toggleChannel(const int channel) const -> void
   {
