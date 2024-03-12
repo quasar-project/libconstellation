@@ -19,21 +19,25 @@ find_package(leaf REQUIRED CONFIG)
 find_package(leafconf REQUIRED CONFIG)
 find_package(Boost REQUIRED)
 
-add_library(${PROJECT_NAME} STATIC)
+add_library(${PROJECT_NAME} STATIC
+  include/constellation/global.h
+  src/c++/ip/netif.h)
 add_library(${PROJECT_NAME}::leaf ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/ip/localaddr.h> $<INSTALL_INTERFACE:include/constellation/ip/localaddr.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/global.h> $<INSTALL_INTERFACE:include/constellation/global.h>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/constellation/ip/ipv4.h> $<INSTALL_INTERFACE:include/constellation/ip/ipv4.h>
 
   PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/localaddr.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/netif.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/c++/ip/ipv4.c++
 )
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     leaf::leaf
-    leafconf::leafconf
+    leaf::leafconf
     Boost::boost
 )
 
