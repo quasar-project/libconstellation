@@ -41,7 +41,7 @@ namespace constellation::network::modules
     const u16 port,
     const std::chrono::seconds request_interval
   )
-    : m_target({ipv4, port})
+    : m_target({string(ipv4), port})
     , m_socket(make_unique<QUdpSocket>(nullptr))
     , m_scheduler(make_unique<QTimer>(nullptr))
     , m_config(make_unique<leaf::conf::Config<config::PowerSwitchConfigData>>(config::build_powerswitch_config()))
@@ -111,6 +111,7 @@ namespace constellation::network::modules
     };
 
     llog::trace("powerswitch: toggling channel {}", channel);
+    llog::trace("packet: {}, {}, {}, {}", packet.marker, packet.channel, packet.response_port, packet.checksum);
     this->write({reinterpret_cast<const char*>(&packet), sizeof(packet)});
   }
 
@@ -141,7 +142,7 @@ namespace constellation::network::modules
     llog::trace("opening socket at {}:{}", ip::Ipv4::local_address_unchecked().to_string(), LOCAL_PORT);
     this->m_socket->bind(QHostAddress(ip::Ipv4::local_address_unchecked().address), LOCAL_PORT);
     this->m_request_interval = request_interval;
-    this->m_target = {ipv4, port};
+    this->m_target = {string(ipv4), port};
 
     this->request();
     this->m_scheduler = make_unique<QTimer>(nullptr);
@@ -196,5 +197,6 @@ namespace constellation::network::modules
       QHostAddress(QString::fromStdString(string(this->m_target.ip))),
       this->m_target.port
     );
+    llog::trace("sended request packet to {}:{}", this->m_target.ip, this->m_target.port);
   }
 }

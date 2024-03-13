@@ -105,7 +105,7 @@ namespace constellation::network::modules
     private:
       struct endpoint
       {
-        string_view ip;
+        string ip;
         u16 port;
       } m_target;
       unique_ptr<QUdpSocket> m_socket;
