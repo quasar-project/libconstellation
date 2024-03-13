@@ -39,6 +39,11 @@ namespace constellation::config
             {"ch4_min_voltage", this->channels.ch4_min_voltage},
             {"ch4_max_voltage", this->channels.ch4_max_voltage},
             {"ch5_min_voltage", this->channels.ch5_min_voltage},
+            {"ch5_max_voltage", this->channels.ch5_max_voltage},
+            {"ch6_min_voltage", this->channels.ch6_min_voltage},
+            {"ch6_max_voltage", this->channels.ch6_max_voltage},
+            {"ch7_min_voltage", this->channels.ch7_min_voltage},
+            {"ch7_max_voltage", this->channels.ch7_max_voltage}
           }}
     };
 
