@@ -44,6 +44,7 @@ namespace constellation::network::modules
     : m_target({ipv4, port})
     , m_socket(make_unique<QUdpSocket>(nullptr))
     , m_scheduler(make_unique<QTimer>(nullptr))
+    , m_config(make_unique<leaf::conf::Config<config::PowerSwitchConfigData>>(config::build_powerswitch_config()))
     , m_request_interval(request_interval)
     , m_buffer(array<u8, 1024>())
     , m_channels(array<ChannelData, 8>())
@@ -55,6 +56,50 @@ namespace constellation::network::modules
 
   PowerSwitch::~PowerSwitch() { this->stop(); }
   auto PowerSwitch::channels() const -> QList<ChannelData> { return {this->m_channels.begin(), this->m_channels.end()}; }
+  auto PowerSwitch::configChannelNames() const -> QList<QString>
+  {
+    return {
+      QString::fromStdString(this->m_config->values.channel_names.ch1),
+      QString::fromStdString(this->m_config->values.channel_names.ch2),
+      QString::fromStdString(this->m_config->values.channel_names.ch3),
+      QString::fromStdString(this->m_config->values.channel_names.ch4),
+      QString::fromStdString(this->m_config->values.channel_names.ch5),
+      QString::fromStdString(this->m_config->values.channel_names.ch6),
+      QString::fromStdString(this->m_config->values.channel_names.ch7),
+    };
+  }
+
+  auto PowerSwitch::configIp() const -> QString { return QString::fromStdString(this->m_config->values.address.ip); }
+  auto PowerSwitch::configPort() const -> u16 { return this->m_config->values.address.port; }
+  auto PowerSwitch::configCellCount() const -> int { return this->m_config->values.gauges.cell_count; }
+  auto PowerSwitch::configCellMinVoltage() const -> float { return this->m_config->values.gauges.cell_min_voltage_volts; }
+  auto PowerSwitch::configCellMaxVoltage() const -> float { return this->m_config->values.gauges.cell_max_voltage_volts; }
+  auto PowerSwitch::configCellMaxCurrent() const -> float { return this->m_config->values.gauges.max_current_amperes; }
+  auto PowerSwitch::configCellMinVoltages() const -> QList<float>
+  {
+    return {
+      this->m_config->values.channels.ch1_min_voltage,
+      this->m_config->values.channels.ch2_min_voltage,
+      this->m_config->values.channels.ch3_min_voltage,
+      this->m_config->values.channels.ch4_min_voltage,
+      this->m_config->values.channels.ch5_min_voltage,
+      this->m_config->values.channels.ch6_min_voltage,
+      this->m_config->values.channels.ch7_min_voltage
+    };
+  }
+  auto PowerSwitch::configCellMaxVoltages() const -> QList<float>
+  {
+    return {
+      this->m_config->values.channels.ch1_max_voltage,
+      this->m_config->values.channels.ch2_max_voltage,
+      this->m_config->values.channels.ch3_max_voltage,
+      this->m_config->values.channels.ch4_max_voltage,
+      this->m_config->values.channels.ch5_max_voltage,
+      this->m_config->values.channels.ch6_max_voltage,
+      this->m_config->values.channels.ch7_max_voltage
+    };
+
+  }
 
   auto PowerSwitch::toggleChannel(const int channel) const -> void
   {

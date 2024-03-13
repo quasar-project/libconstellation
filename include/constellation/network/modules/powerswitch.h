@@ -5,6 +5,7 @@
 #include <chrono>
 #include <qobject.h>
 #include <constellation/global.h>
+#include <constellation/config/config.h>
 
 class QTimer;
 class QUdpSocket;
@@ -46,6 +47,15 @@ namespace constellation::network::modules
   {
     Q_OBJECT
     Q_PROPERTY(QList<ChannelData> channels READ channels NOTIFY channelsChanged FINAL)
+    Q_PROPERTY(QList<QString> configChannelNames READ configChannelNames CONSTANT FINAL)
+    Q_PROPERTY(QString configIp READ configIp CONSTANT FINAL)
+    Q_PROPERTY(u16 configPort READ configPort CONSTANT FINAL)
+    Q_PROPERTY(int configCellCount READ configCellCount CONSTANT FINAL)
+    Q_PROPERTY(float configCellMinVoltage READ configCellMinVoltage CONSTANT FINAL)
+    Q_PROPERTY(float configCellMaxVoltage READ configCellMaxVoltage CONSTANT FINAL)
+    Q_PROPERTY(float configCellMaxCurrent READ configCellMaxCurrent CONSTANT FINAL)
+    Q_PROPERTY(QList<float> configCellMinVoltages READ configCellMinVoltages CONSTANT FINAL)
+    Q_PROPERTY(QList<float> configCellMaxVoltages READ configCellMaxVoltages CONSTANT FINAL)
 
     struct [[gnu::packed]] RequestPacket
     {
@@ -69,6 +79,15 @@ namespace constellation::network::modules
       virtual ~PowerSwitch() override;
 
       [[nodiscard]] QList<ChannelData> channels() const;
+      [[nodiscard]] QList<QString> configChannelNames() const;
+      [[nodiscard]] QString configIp() const;
+      [[nodiscard]] u16 configPort() const;
+      [[nodiscard]] int configCellCount() const;
+      [[nodiscard]] float configCellMinVoltage() const;
+      [[nodiscard]] float configCellMaxVoltage() const;
+      [[nodiscard]] float configCellMaxCurrent() const;
+      [[nodiscard]] QList<float> configCellMinVoltages() const;
+      [[nodiscard]] QList<float> configCellMaxVoltages() const;
 
       Q_INVOKABLE void toggleChannel(int channel) const;
       Q_INVOKABLE void stop() const;
@@ -91,6 +110,7 @@ namespace constellation::network::modules
       } m_target;
       unique_ptr<QUdpSocket> m_socket;
       unique_ptr<QTimer> m_scheduler;
+      unique_ptr<leaf::conf::Config<config::PowerSwitchConfigData>> m_config;
       std::chrono::seconds m_request_interval;
       array<u8, 1024> m_buffer;
       array<ChannelData, 8> m_channels;

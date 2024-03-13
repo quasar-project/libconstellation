@@ -9,4 +9,4 @@ description = "Library for working with QuaSAR protocols and hardware"
 [dependencies]
 cmake = { version = "0.1.2", distribution = "sources" }
 leaf = { version = "0.4.1", distribution = "static" }
-leafconf = { version = "0.1.2", distribution = "static" }
+leafconf = { version = "0.1.3", distribution = "static" }
